@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dropdown/flutter_dropdown.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hecbox/ConfigGenerales.dart';
 import 'package:hecbox/Modelos/piqModelos.dart';
+import 'package:hecbox/Vistas/psqVista.dart';
 import 'package:http/http.dart' as http;
 
 class PiqVista extends StatefulWidget {
@@ -160,7 +162,16 @@ class _PiqVistaState extends State<PiqVista> {
     String dropdownValue = 'Elegir Rol';
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          ElevatedButton.icon(
+              onPressed: () {
+                Get.to(const Psq());
+              },
+              icon: const Icon(Icons.ac_unit),
+              label: const Text('PSQ'))
+        ],
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: SizedBox(
