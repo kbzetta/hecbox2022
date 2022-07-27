@@ -129,7 +129,43 @@ class _IngresoVistaState extends State<IngresoVista> {
                       height: 45,
                       child: ElevatedButton(
                         onPressed: () async {
-                          Get.to(const IngresoPacienteVista());
+                          final response = await http.post(
+                            Uri.parse(usuarioApiUrl),
+                            headers: {
+                              'Content-Type':
+                                  'application/x-www-form-urlencoded',
+                            },
+                            encoding: Encoding.getByName('utf-8'),
+                            body: {
+                              'usuario': _usuario.text,
+                              'password': _contrasena.text,
+                            },
+                          );
+
+                          if (response.statusCode == 200) {
+                            // If the server did return a 201 CREATED response,
+                            // then parse the JSON.
+                            Get.to(const IngresoPacienteVista());
+                            print(response.body);
+                          }
+
+                          if (response.statusCode == 400) {
+                            return showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor:
+                                        Colors.yellowAccent.shade100,
+                                    content: Row(
+                                      children: const [
+                                        Text(
+                                            'Usuario y/o contraseña invalidos'),
+                                        Icon(Icons.warning)
+                                      ],
+                                    ),
+                                  );
+                                });
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           primary: Colores.secundario,

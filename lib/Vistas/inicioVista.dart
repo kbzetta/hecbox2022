@@ -1,12 +1,17 @@
+import 'dart:convert';
+
+import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dropdown/flutter_dropdown.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hecbox/ConfigGenerales.dart';
 import 'package:hecbox/Modelos/modelos.dart';
+import 'package:hecbox/Modelos/piqModelos.dart';
 import 'package:hecbox/Vistas/piqVista.dart';
 import 'package:simple_timeline/entity/timeline_entity.dart';
 import 'package:simple_timeline/presenter/simple_timeline_impl.dart';
+import 'package:http/http.dart' as http;
 
 class InicioVista extends StatefulWidget {
   final Operacion paciente;
@@ -18,6 +23,71 @@ class InicioVista extends StatefulWidget {
 }
 
 class _InicioVistaState extends State<InicioVista> {
+  /////// internacion ////////
+  List<NombreModel> dataInternacion = <NombreModel>[];
+  Future<void> getInternacion() async {
+    http.Response res = await http.get(Uri.parse("$serverUrl/especialidads"));
+
+    var jsonData = jsonDecode(res.body);
+    List<NombreModel> resultList = List<NombreModel>.from(
+        json.decode(res.body).map((x) => NombreModel.fromMap(x)));
+
+    setState(() {
+      dataInternacion = resultList;
+    });
+  }
+
+  /////// anestesia ////////
+  List<NombreModel> dataAnestesia = <NombreModel>[];
+  Future<void> getAnestesia() async {
+    http.Response res = await http.get(Uri.parse("$serverUrl/anestesia-tipos"));
+
+    var jsonData = jsonDecode(res.body);
+    List<NombreModel> resultList = List<NombreModel>.from(
+        json.decode(res.body).map((x) => NombreModel.fromMap(x)));
+
+    setState(() {
+      dataAnestesia = resultList;
+    });
+  }
+
+  /////// Anestesiologo ////////
+  List<NombreModel> dataAnestesiologo = <NombreModel>[];
+  Future<void> getAnestesiologo() async {
+    http.Response res = await http.get(Uri.parse("$serverUrl/profesionales"));
+
+    var jsonData = jsonDecode(res.body);
+    List<NombreModel> resultList = List<NombreModel>.from(
+        json.decode(res.body).map((x) => NombreModel.fromMap(x)));
+
+    setState(() {
+      dataAnestesiologo = resultList;
+    });
+  }
+
+  /////// Anestesiologo ////////
+  List<NombreModel> dataAsaTipo = <NombreModel>[];
+  Future<void> getAsaTipo() async {
+    http.Response res = await http.get(Uri.parse("$serverUrl/asa-tipos"));
+
+    var jsonData = jsonDecode(res.body);
+    List<NombreModel> resultList = List<NombreModel>.from(
+        json.decode(res.body).map((x) => NombreModel.fromMap(x)));
+
+    setState(() {
+      dataAsaTipo = resultList;
+    });
+  }
+
+  @override
+  void initState() {
+    getInternacion();
+    getAnestesia();
+    getAnestesiologo();
+    getAsaTipo();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     String? rolMedico = 'Elegir Rol';
@@ -25,6 +95,7 @@ class _InicioVistaState extends State<InicioVista> {
     bool salidaquirofano = false;
     bool entradaZonaquirofano = false;
     bool salidazONAquirofano = false;
+    String internacion = '';
 
     var demos = "";
     return Scaffold(
@@ -42,9 +113,6 @@ class _InicioVistaState extends State<InicioVista> {
         child: Column(
           children: [
             DrawerHeader(child: Image.asset('assets/img/hecbox.jpg')),
-            const ListTile(
-              title: Text('P.S.Q'),
-            ),
             const ListTile(
               title: Text('Listado P.I.Q'),
             ),
@@ -288,55 +356,205 @@ class _InicioVistaState extends State<InicioVista> {
                                 builder: (BuildContext context) {
                                   return StatefulBuilder(
                                     builder: (BuildContext context, setState) {
-                                      return Card(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(20.0),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                'Tabla de Tiempos',
-                                                style: GoogleFonts.encodeSans(
-                                                  fontSize: 35,
-                                                  fontWeight: FontWeight.w700,
+                                      String valueChanged4;
+                                      String valueSaved4;
+                                      return SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Card(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(20.0),
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                      'Tabla de Tiempos',
+                                                      style: GoogleFonts
+                                                          .encodeSans(
+                                                        fontSize: 35,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 20,
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        const Text(
+                                                            'Fecha Inicio Anestesia'),
+                                                        SizedBox(
+                                                          width: 300,
+                                                          child: DateTimePicker(
+                                                            type:
+                                                                DateTimePickerType
+                                                                    .time,
+                                                            //timePickerEntryModeInput: true,
+                                                            //controller: _controller4,
+                                                            initialValue:
+                                                                '', //_initialValue,
+                                                            icon: const Icon(Icons
+                                                                .access_time),
+                                                            timeLabelText:
+                                                                "Seleccionar",
+                                                            use24HourFormat:
+                                                                false,
+
+                                                            onChanged: (val) =>
+                                                                setState(() =>
+                                                                    valueChanged4 =
+                                                                        val),
+                                                            validator: (val) {
+                                                              String
+                                                                  valueToValidate4;
+                                                              setState(() =>
+                                                                  valueToValidate4 =
+                                                                      val ??
+                                                                          '');
+                                                              return null;
+                                                            },
+                                                            onSaved: (val) =>
+                                                                setState(() =>
+                                                                    valueSaved4 =
+                                                                        val ??
+                                                                            ''),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    const Divider(),
+                                                    Row(
+                                                      children: [
+                                                        const Text(
+                                                            'Fecha Inicio Cirugía'),
+                                                        SizedBox(
+                                                          width: 300,
+                                                          child: DateTimePicker(
+                                                            type:
+                                                                DateTimePickerType
+                                                                    .time,
+                                                            //timePickerEntryModeInput: true,
+                                                            //controller: _controller4,
+                                                            initialValue:
+                                                                '', //_initialValue,
+                                                            icon: const Icon(Icons
+                                                                .access_time),
+                                                            timeLabelText:
+                                                                "Seleccionar",
+                                                            use24HourFormat:
+                                                                false,
+
+                                                            onChanged: (val) =>
+                                                                setState(() =>
+                                                                    valueChanged4 =
+                                                                        val),
+                                                            validator: (val) {
+                                                              String
+                                                                  valueToValidate4;
+                                                              setState(() =>
+                                                                  valueToValidate4 =
+                                                                      val ??
+                                                                          '');
+                                                              return null;
+                                                            },
+                                                            onSaved: (val) =>
+                                                                setState(() =>
+                                                                    valueSaved4 =
+                                                                        val ??
+                                                                            ''),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    const Divider(),
+                                                    Row(
+                                                      children: [
+                                                        const Text(
+                                                            'Fecha Fin Cirugía'),
+                                                        SizedBox(
+                                                          width: 300,
+                                                          child: DateTimePicker(
+                                                            type:
+                                                                DateTimePickerType
+                                                                    .time,
+                                                            //timePickerEntryModeInput: true,
+                                                            //controller: _controller4,
+                                                            initialValue:
+                                                                '', //_initialValue,
+                                                            icon: const Icon(Icons
+                                                                .access_time),
+                                                            timeLabelText:
+                                                                "Seleccionar",
+                                                            use24HourFormat:
+                                                                false,
+
+                                                            onChanged: (val) =>
+                                                                setState(() =>
+                                                                    valueChanged4 =
+                                                                        val),
+                                                            validator: (val) {
+                                                              String
+                                                                  valueToValidate4;
+                                                              setState(() =>
+                                                                  valueToValidate4 =
+                                                                      val ??
+                                                                          '');
+                                                              return null;
+                                                            },
+                                                            onSaved: (val) =>
+                                                                setState(() =>
+                                                                    valueSaved4 =
+                                                                        val ??
+                                                                            ''),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    const Divider(),
+                                                    Row(
+                                                      children: [
+                                                        const Text(
+                                                            'Fecha Fin Anestesia'),
+                                                        SizedBox(
+                                                          width: 300,
+                                                          child: DateTimePicker(
+                                                            type:
+                                                                DateTimePickerType
+                                                                    .time,
+                                                            //timePickerEntryModeInput: true,
+                                                            //controller: _controller4,
+                                                            initialValue:
+                                                                '', //_initialValue,
+                                                            icon: const Icon(Icons
+                                                                .access_time),
+                                                            timeLabelText:
+                                                                "Seleccionar",
+                                                            use24HourFormat:
+                                                                false,
+
+                                                            onChanged: (val) =>
+                                                                setState(() =>
+                                                                    valueChanged4 =
+                                                                        val),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                              const SizedBox(
-                                                height: 20,
-                                              ),
-                                              Row(
-                                                children: const [
-                                                  Text('Fecha Inicio Anestesia')
-                                                ],
-                                              ),
-                                              const Divider(),
-                                              Row(
-                                                children: const [
-                                                  Text('Fecha Inicio Cirugía')
-                                                ],
-                                              ),
-                                              const Divider(),
-                                              Row(
-                                                children: const [
-                                                  Text('Fecha Fin Cirugía')
-                                                ],
-                                              ),
-                                              const Divider(),
-                                              Row(
-                                                children: const [
-                                                  Text('Fecha Fin Anestesia')
-                                                ],
-                                              ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       );
                                     },
                                   );
                                 });
                           },
-                          icon: const Icon(
-                            Icons.abc_sharp,
-                            size: 60,
+                          icon: Image.asset(
+                            'assets/img/tiempos.png',
+                            color: Colors.white,
+                            width: 40,
                           ),
                           label: const Text('TIEMPOS')),
                     ),
@@ -361,6 +579,126 @@ class _InicioVistaState extends State<InicioVista> {
                                               fontSize: 35,
                                               fontWeight: FontWeight.w700,
                                             ),
+                                          ),
+                                          StatefulBuilder(
+                                            builder: (BuildContext context,
+                                                setState) {
+                                              return SingleChildScrollView(
+                                                child: SizedBox(
+                                                  height: 400,
+                                                  child: Column(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 500,
+                                                        child: Row(
+                                                          children: [
+                                                            const Text(
+                                                                'Elegir Sector Recuperación: '),
+                                                            Expanded(
+                                                              child: Autocomplete<
+                                                                  NombreModel>(
+                                                                initialValue:
+                                                                    TextEditingValue(
+                                                                        text:
+                                                                            internacion),
+                                                                optionsBuilder:
+                                                                    (TextEditingValue
+                                                                        textEditingValue) {
+                                                                  return dataInternacion
+                                                                      .where((NombreModel continent) => continent
+                                                                          .nombre
+                                                                          .toLowerCase()
+                                                                          .startsWith(textEditingValue
+                                                                              .text
+                                                                              .toLowerCase()))
+                                                                      .toList();
+                                                                },
+                                                                displayStringForOption:
+                                                                    (NombreModel
+                                                                            option) =>
+                                                                        option
+                                                                            .nombre,
+                                                                fieldViewBuilder: (BuildContext context,
+                                                                    TextEditingController
+                                                                        fieldTextEditingController,
+                                                                    FocusNode
+                                                                        fieldFocusNode,
+                                                                    VoidCallback
+                                                                        onFieldSubmitted) {
+                                                                  return TextField(
+                                                                    controller:
+                                                                        fieldTextEditingController,
+                                                                    focusNode:
+                                                                        fieldFocusNode,
+                                                                    style: const TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.bold),
+                                                                  );
+                                                                },
+                                                                onSelected:
+                                                                    (NombreModel
+                                                                        selection) {
+                                                                  setState(() {
+                                                                    internacion =
+                                                                        selection
+                                                                            .nombre;
+                                                                  });
+                                                                  print(
+                                                                      'Selected: ${selection.nombre}');
+                                                                },
+                                                                optionsViewBuilder: (BuildContext context,
+                                                                    AutocompleteOnSelected<
+                                                                            NombreModel>
+                                                                        onSelected,
+                                                                    Iterable<
+                                                                            NombreModel>
+                                                                        options) {
+                                                                  return Align(
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .topLeft,
+                                                                    child:
+                                                                        Material(
+                                                                      child:
+                                                                          SizedBox(
+                                                                        width:
+                                                                            300,
+                                                                        child: ListView
+                                                                            .builder(
+                                                                          padding:
+                                                                              const EdgeInsets.all(10.0),
+                                                                          itemCount:
+                                                                              options.length,
+                                                                          itemBuilder:
+                                                                              (BuildContext context, int index) {
+                                                                            final NombreModel
+                                                                                option =
+                                                                                options.elementAt(index);
+
+                                                                            return GestureDetector(
+                                                                              onTap: () {
+                                                                                onSelected(option);
+                                                                              },
+                                                                              child: ListTile(
+                                                                                title: Text(option.nombre, style: const TextStyle(color: Colores.secundario)),
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                           )
                                         ],
                                       );
@@ -368,9 +706,10 @@ class _InicioVistaState extends State<InicioVista> {
                                   );
                                 });
                           },
-                          icon: const Icon(
-                            Icons.abc_sharp,
-                            size: 60,
+                          icon: Image.asset(
+                            'assets/img/cama.png',
+                            color: Colors.white,
+                            width: 40,
                           ),
                           label: const Text('INTERNACIÓN')),
                     ),
@@ -392,24 +731,551 @@ class _InicioVistaState extends State<InicioVista> {
                                 builder: (BuildContext context) {
                                   return StatefulBuilder(
                                     builder: (BuildContext context, setState) {
-                                      return Column(
-                                        children: [
-                                          Text(
-                                            'Anestesia',
-                                            style: GoogleFonts.encodeSans(
-                                              fontSize: 35,
-                                              fontWeight: FontWeight.w700,
+                                      return SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Anestesia',
+                                              style: GoogleFonts.encodeSans(
+                                                fontSize: 35,
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                             ),
-                                          )
-                                        ],
+                                            Card(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: double.infinity,
+                                                      color: Colores.secundario,
+                                                      child: const Padding(
+                                                        padding:
+                                                            EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          'Anestesia',
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 500,
+                                                      child: Row(
+                                                        children: [
+                                                          const Text(
+                                                              'Tipo de Anestesia: '),
+                                                          Expanded(
+                                                            child: Autocomplete<
+                                                                NombreModel>(
+                                                              initialValue:
+                                                                  TextEditingValue(
+                                                                      text:
+                                                                          internacion),
+                                                              optionsBuilder:
+                                                                  (TextEditingValue
+                                                                      textEditingValue) {
+                                                                return dataAnestesia
+                                                                    .where((NombreModel continent) => continent
+                                                                        .nombre
+                                                                        .toLowerCase()
+                                                                        .startsWith(textEditingValue
+                                                                            .text
+                                                                            .toLowerCase()))
+                                                                    .toList();
+                                                              },
+                                                              displayStringForOption:
+                                                                  (NombreModel
+                                                                          option) =>
+                                                                      option
+                                                                          .nombre,
+                                                              fieldViewBuilder: (BuildContext
+                                                                      context,
+                                                                  TextEditingController
+                                                                      fieldTextEditingController,
+                                                                  FocusNode
+                                                                      fieldFocusNode,
+                                                                  VoidCallback
+                                                                      onFieldSubmitted) {
+                                                                return TextField(
+                                                                  controller:
+                                                                      fieldTextEditingController,
+                                                                  focusNode:
+                                                                      fieldFocusNode,
+                                                                  style: const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                );
+                                                              },
+                                                              onSelected:
+                                                                  (NombreModel
+                                                                      selection) {
+                                                                setState(() {
+                                                                  internacion =
+                                                                      selection
+                                                                          .nombre;
+                                                                });
+                                                                print(
+                                                                    'Selected: ${selection.nombre}');
+                                                              },
+                                                              optionsViewBuilder: (BuildContext
+                                                                      context,
+                                                                  AutocompleteOnSelected<
+                                                                          NombreModel>
+                                                                      onSelected,
+                                                                  Iterable<
+                                                                          NombreModel>
+                                                                      options) {
+                                                                return Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .topLeft,
+                                                                  child:
+                                                                      Material(
+                                                                    child:
+                                                                        SizedBox(
+                                                                      width:
+                                                                          300,
+                                                                      child: ListView
+                                                                          .builder(
+                                                                        padding:
+                                                                            const EdgeInsets.all(10.0),
+                                                                        itemCount:
+                                                                            options.length,
+                                                                        itemBuilder:
+                                                                            (BuildContext context,
+                                                                                int index) {
+                                                                          final NombreModel
+                                                                              option =
+                                                                              options.elementAt(index);
+
+                                                                          return GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              onSelected(option);
+                                                                            },
+                                                                            child:
+                                                                                ListTile(
+                                                                              title: Text(option.nombre, style: const TextStyle(color: Colores.secundario)),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const Divider(),
+                                                    SizedBox(
+                                                      width: 500,
+                                                      child: Row(
+                                                        children: [
+                                                          const Text(
+                                                              'Tipo de Asa: '),
+                                                          Expanded(
+                                                            child: Autocomplete<
+                                                                NombreModel>(
+                                                              initialValue:
+                                                                  TextEditingValue(
+                                                                      text:
+                                                                          internacion),
+                                                              optionsBuilder:
+                                                                  (TextEditingValue
+                                                                      textEditingValue) {
+                                                                return dataAsaTipo
+                                                                    .where((NombreModel continent) => continent
+                                                                        .nombre
+                                                                        .toLowerCase()
+                                                                        .startsWith(textEditingValue
+                                                                            .text
+                                                                            .toLowerCase()))
+                                                                    .toList();
+                                                              },
+                                                              displayStringForOption:
+                                                                  (NombreModel
+                                                                          option) =>
+                                                                      option
+                                                                          .nombre,
+                                                              fieldViewBuilder: (BuildContext
+                                                                      context,
+                                                                  TextEditingController
+                                                                      fieldTextEditingController,
+                                                                  FocusNode
+                                                                      fieldFocusNode,
+                                                                  VoidCallback
+                                                                      onFieldSubmitted) {
+                                                                return TextField(
+                                                                  controller:
+                                                                      fieldTextEditingController,
+                                                                  focusNode:
+                                                                      fieldFocusNode,
+                                                                  style: const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                );
+                                                              },
+                                                              onSelected:
+                                                                  (NombreModel
+                                                                      selection) {
+                                                                setState(() {
+                                                                  internacion =
+                                                                      selection
+                                                                          .nombre;
+                                                                });
+                                                                print(
+                                                                    'Selected: ${selection.nombre}');
+                                                              },
+                                                              optionsViewBuilder: (BuildContext
+                                                                      context,
+                                                                  AutocompleteOnSelected<
+                                                                          NombreModel>
+                                                                      onSelected,
+                                                                  Iterable<
+                                                                          NombreModel>
+                                                                      options) {
+                                                                return Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .topLeft,
+                                                                  child:
+                                                                      Material(
+                                                                    child:
+                                                                        SizedBox(
+                                                                      width:
+                                                                          300,
+                                                                      child: ListView
+                                                                          .builder(
+                                                                        padding:
+                                                                            const EdgeInsets.all(10.0),
+                                                                        itemCount:
+                                                                            options.length,
+                                                                        itemBuilder:
+                                                                            (BuildContext context,
+                                                                                int index) {
+                                                                          final NombreModel
+                                                                              option =
+                                                                              options.elementAt(index);
+
+                                                                          return GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              onSelected(option);
+                                                                            },
+                                                                            child:
+                                                                                ListTile(
+                                                                              title: Text(option.nombre, style: const TextStyle(color: Colores.secundario)),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Card(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: double.infinity,
+                                                      color: Colores.secundario,
+                                                      child: const Padding(
+                                                        padding:
+                                                            EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          'Anestesiologo',
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 500,
+                                                      child: Row(
+                                                        children: [
+                                                          const Text(
+                                                              'Buscar Nombre Anestesiologo: '),
+                                                          Expanded(
+                                                            child: Autocomplete<
+                                                                NombreModel>(
+                                                              initialValue:
+                                                                  TextEditingValue(
+                                                                      text:
+                                                                          internacion),
+                                                              optionsBuilder:
+                                                                  (TextEditingValue
+                                                                      textEditingValue) {
+                                                                return dataAnestesiologo
+                                                                    .where((NombreModel continent) => continent
+                                                                        .nombre
+                                                                        .toLowerCase()
+                                                                        .startsWith(textEditingValue
+                                                                            .text
+                                                                            .toLowerCase()))
+                                                                    .toList();
+                                                              },
+                                                              displayStringForOption:
+                                                                  (NombreModel
+                                                                          option) =>
+                                                                      option
+                                                                          .nombre,
+                                                              fieldViewBuilder: (BuildContext
+                                                                      context,
+                                                                  TextEditingController
+                                                                      fieldTextEditingController,
+                                                                  FocusNode
+                                                                      fieldFocusNode,
+                                                                  VoidCallback
+                                                                      onFieldSubmitted) {
+                                                                return TextField(
+                                                                  controller:
+                                                                      fieldTextEditingController,
+                                                                  focusNode:
+                                                                      fieldFocusNode,
+                                                                  style: const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                );
+                                                              },
+                                                              onSelected:
+                                                                  (NombreModel
+                                                                      selection) {
+                                                                setState(() {
+                                                                  internacion =
+                                                                      selection
+                                                                          .nombre;
+                                                                });
+                                                                print(
+                                                                    'Selected: ${selection.nombre}');
+                                                              },
+                                                              optionsViewBuilder: (BuildContext
+                                                                      context,
+                                                                  AutocompleteOnSelected<
+                                                                          NombreModel>
+                                                                      onSelected,
+                                                                  Iterable<
+                                                                          NombreModel>
+                                                                      options) {
+                                                                return Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .topLeft,
+                                                                  child:
+                                                                      Material(
+                                                                    child:
+                                                                        SizedBox(
+                                                                      width:
+                                                                          300,
+                                                                      child: ListView
+                                                                          .builder(
+                                                                        padding:
+                                                                            const EdgeInsets.all(10.0),
+                                                                        itemCount:
+                                                                            options.length,
+                                                                        itemBuilder:
+                                                                            (BuildContext context,
+                                                                                int index) {
+                                                                          final NombreModel
+                                                                              option =
+                                                                              options.elementAt(index);
+
+                                                                          return GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              onSelected(option);
+                                                                            },
+                                                                            child:
+                                                                                ListTile(
+                                                                              title: Text(option.nombre, style: const TextStyle(color: Colores.secundario)),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Card(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  children: [
+                                                    Container(
+                                                      width: double.infinity,
+                                                      color: Colores.secundario,
+                                                      child: const Padding(
+                                                        padding:
+                                                            EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          'Tecnico Anestesia',
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 500,
+                                                      child: Row(
+                                                        children: [
+                                                          const Text(
+                                                              'Buscar Nombre Tecnico Anestesia: '),
+                                                          Expanded(
+                                                            child: Autocomplete<
+                                                                NombreModel>(
+                                                              initialValue:
+                                                                  TextEditingValue(
+                                                                      text:
+                                                                          internacion),
+                                                              optionsBuilder:
+                                                                  (TextEditingValue
+                                                                      textEditingValue) {
+                                                                return dataAnestesiologo
+                                                                    .where((NombreModel continent) => continent
+                                                                        .nombre
+                                                                        .toLowerCase()
+                                                                        .startsWith(textEditingValue
+                                                                            .text
+                                                                            .toLowerCase()))
+                                                                    .toList();
+                                                              },
+                                                              displayStringForOption:
+                                                                  (NombreModel
+                                                                          option) =>
+                                                                      option
+                                                                          .nombre,
+                                                              fieldViewBuilder: (BuildContext
+                                                                      context,
+                                                                  TextEditingController
+                                                                      fieldTextEditingController,
+                                                                  FocusNode
+                                                                      fieldFocusNode,
+                                                                  VoidCallback
+                                                                      onFieldSubmitted) {
+                                                                return TextField(
+                                                                  controller:
+                                                                      fieldTextEditingController,
+                                                                  focusNode:
+                                                                      fieldFocusNode,
+                                                                  style: const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold),
+                                                                );
+                                                              },
+                                                              onSelected:
+                                                                  (NombreModel
+                                                                      selection) {
+                                                                setState(() {
+                                                                  internacion =
+                                                                      selection
+                                                                          .nombre;
+                                                                });
+                                                                print(
+                                                                    'Selected: ${selection.nombre}');
+                                                              },
+                                                              optionsViewBuilder: (BuildContext
+                                                                      context,
+                                                                  AutocompleteOnSelected<
+                                                                          NombreModel>
+                                                                      onSelected,
+                                                                  Iterable<
+                                                                          NombreModel>
+                                                                      options) {
+                                                                return Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .topLeft,
+                                                                  child:
+                                                                      Material(
+                                                                    child:
+                                                                        SizedBox(
+                                                                      width:
+                                                                          300,
+                                                                      child: ListView
+                                                                          .builder(
+                                                                        padding:
+                                                                            const EdgeInsets.all(10.0),
+                                                                        itemCount:
+                                                                            options.length,
+                                                                        itemBuilder:
+                                                                            (BuildContext context,
+                                                                                int index) {
+                                                                          final NombreModel
+                                                                              option =
+                                                                              options.elementAt(index);
+
+                                                                          return GestureDetector(
+                                                                            onTap:
+                                                                                () {
+                                                                              onSelected(option);
+                                                                            },
+                                                                            child:
+                                                                                ListTile(
+                                                                              title: Text(option.nombre, style: const TextStyle(color: Colores.secundario)),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                       );
                                     },
                                   );
                                 });
                           },
-                          icon: const Icon(
-                            Icons.abc_sharp,
-                            size: 60,
+                          icon: Image.asset(
+                            'assets/img/anestesia.png',
+                            color: Colors.white,
+                            width: 40,
                           ),
                           label: const Text('ANESTESIA')),
                     ),
@@ -427,62 +1293,71 @@ class _InicioVistaState extends State<InicioVista> {
                                   return StatefulBuilder(
                                     builder: (BuildContext context, setState) {
                                       return SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              'Motivi de Retraso',
-                                              style: GoogleFonts.encodeSans(
-                                                fontSize: 35,
-                                                fontWeight: FontWeight.w700,
+                                        child: SizedBox(
+                                          height: 400,
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                'Motivo de Retraso',
+                                                style: GoogleFonts.encodeSans(
+                                                  fontSize: 35,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
                                               ),
-                                            ),
-                                            DropDown(
-                                              isExpanded: true,
-                                              items: const [
-                                                'ANESTESIOLOGO',
-                                                'ARMADO DE MESA QUIRURGICA',
-                                                'CAMA PARA POST OPERATORIO',
-                                                'CAMBIO DE HORARIO',
-                                                'CIRUGIA ANTERIOR (TIEMPO)',
-                                                'CIRUGIA ANTERIOR (URGENCIA)',
-                                                'CIRUJANO',
-                                                'CIRUJANO Y ANESTESIOLOGO',
-                                                'FALTA DE MEDICO PARA TRASLADO',
-                                                'FALTA DE MEDICO RECUPERADOR',
-                                                'HORARIO DE PEDIDO',
-                                                'INCONVENIENTES TECNICOS CON MATERIAL ESTERIL',
-                                                'INCONVENIENTES TECNICOS DE EQUIPAMIENTO',
-                                                'MATERIAL DE ORTOPEDIA',
-                                                'PACIENTE (ESTUDIO PREVIO)',
-                                                'PACIENTE (INTERNACION)',
-                                                'PACIENTE (PREPARACION)',
-                                                'POR FALTA DE PERSONAL DE INSTRUMENTACIÓN',
-                                                'PREPARACION DE QUIROFANO',
-                                                'SIN CONSENTIMIENTO',
-                                                'TRASLADO',
-                                                'PERFUSIONISTA',
-                                              ],
-                                              hint: const Text("Elegir Rol"),
-                                              icon: const Icon(
-                                                Icons.expand_more,
-                                                color: Colors.blue,
+                                              SizedBox(
+                                                width: 500,
+                                                child: DropDown(
+                                                  isExpanded: true,
+                                                  items: const [
+                                                    'ANESTESIOLOGO',
+                                                    'ARMADO DE MESA QUIRURGICA',
+                                                    'CAMA PARA POST OPERATORIO',
+                                                    'CAMBIO DE HORARIO',
+                                                    'CIRUGIA ANTERIOR (TIEMPO)',
+                                                    'CIRUGIA ANTERIOR (URGENCIA)',
+                                                    'CIRUJANO',
+                                                    'CIRUJANO Y ANESTESIOLOGO',
+                                                    'FALTA DE MEDICO PARA TRASLADO',
+                                                    'FALTA DE MEDICO RECUPERADOR',
+                                                    'HORARIO DE PEDIDO',
+                                                    'INCONVENIENTES TECNICOS CON MATERIAL ESTERIL',
+                                                    'INCONVENIENTES TECNICOS DE EQUIPAMIENTO',
+                                                    'MATERIAL DE ORTOPEDIA',
+                                                    'PACIENTE (ESTUDIO PREVIO)',
+                                                    'PACIENTE (INTERNACION)',
+                                                    'PACIENTE (PREPARACION)',
+                                                    'POR FALTA DE PERSONAL DE INSTRUMENTACIÓN',
+                                                    'PREPARACION DE QUIROFANO',
+                                                    'SIN CONSENTIMIENTO',
+                                                    'TRASLADO',
+                                                    'PERFUSIONISTA',
+                                                  ],
+                                                  hint:
+                                                      const Text("Elegir Rol"),
+                                                  icon: const Icon(
+                                                    Icons.expand_more,
+                                                    color: Colors.blue,
+                                                  ),
+                                                  onChanged:
+                                                      (String? newValue) {
+                                                    setState(() {
+                                                      rolMedico = newValue!;
+                                                    });
+                                                  },
+                                                ),
                                               ),
-                                              onChanged: (String? newValue) {
-                                                setState(() {
-                                                  rolMedico = newValue!;
-                                                });
-                                              },
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       );
                                     },
                                   );
                                 });
                           },
-                          icon: const Icon(
-                            Icons.abc_sharp,
-                            size: 60,
+                          icon: Image.asset(
+                            'assets/img/retraso.png',
+                            color: Colors.white,
+                            width: 40,
                           ),
                           label: const Text('RETRASO')),
                     ),

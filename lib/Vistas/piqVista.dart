@@ -163,12 +163,17 @@ class _PiqVistaState extends State<PiqVista> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colores.secundario,
         actions: [
           ElevatedButton.icon(
               onPressed: () {
                 Get.to(const Psq());
               },
-              icon: const Icon(Icons.ac_unit),
+              icon: Image.asset(
+                'assets/img/psq.png',
+                color: Colors.white,
+                width: 30,
+              ),
               label: const Text('PSQ'))
         ],
       ),
